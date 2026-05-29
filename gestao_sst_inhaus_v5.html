@@ -282,19 +282,6 @@ textarea.inp{resize:vertical;min-height:60px}
 .flex-row{display:flex;align-items:center;gap:8px}
 .ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
 .divider{height:1px;background:var(--border);margin:12px 0}
-/* ── SYNC INDICATOR ── */
-#sync-indicator{position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;font-family:'DM Mono',monospace;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:.3s;cursor:pointer}
-#sync-indicator.syncing{border-color:#006EFF;color:#006EFF;background:#EFF6FF}
-#sync-indicator.ok{border-color:#16A34A;color:#16A34A;background:#F0FDF4}
-#sync-indicator.error{border-color:#D92D20;color:#D92D20;background:#FEF2F2}
-#sync-indicator.offline{border-color:#9098B8;color:#9098B8}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
-.sync-dot.pulse{animation:syncpulse 1s infinite}
-@keyframes syncpulse{0%,100%{opacity:1}50%{opacity:.3}}
-/* ── SETUP MODAL ── */
-#setup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
-#setup-overlay.open{display:flex}
-#setup-box{background:#fff;border-radius:16px;padding:32px;width:520px;max-width:96%;box-shadow:0 24px 64px rgba(0,0,0,.2)}
 </style>
 </head>
 <body>
@@ -341,7 +328,7 @@ textarea.inp{resize:vertical;min-height:60px}
   <div class="topbar-title" id="view-title">DASHBOARD</div>
   <div class="flex-row" style="gap:12px">
     <span class="topbar-date" id="today-date"></span>
-    <button class="btn" onclick="openSetup()" title="Configurar sincronização online" style="font-size:12px">☁ Sync</button>
+    <button class="btn" onclick="openGHSetup()" title="Configurar sincronização GitHub" style="font-size:12px">⚡ Sync</button>
     <button class="btn" onclick="exportarDados()" title="Exportar backup JSON" style="font-size:12px">⬇ Backup</button>
     <label class="btn" title="Restaurar backup JSON" style="font-size:12px;cursor:pointer">⬆ Restaurar<input type="file" accept=".json" onchange="importarDados(this)" style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal('empregado')">+ Empregado</button>
@@ -622,43 +609,46 @@ textarea.inp{resize:vertical;min-height:60px}
 </div><!-- /app -->
 
 <!-- MODAL -->
-<!-- SYNC INDICATOR -->
-<div id="sync-indicator" class="offline" onclick="forcSync()" title="Clique para sincronizar agora">
-  <span class="sync-dot"></span>
-  <span id="sync-label">Offline</span>
+<!-- GITHUB SYNC INDICATOR -->
+<div id="gh-status" onclick="ghEnabled()?ghSync(true):openGHSetup()" style="position:fixed;bottom:16px;right:16px;z-index:9999;padding:6px 14px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;border:1px solid #E0E3EE;cursor:pointer;background:#F8F9FC;color:#9098B8;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+  ⚡ Clique para conectar
 </div>
 
-<!-- CLOUD SETUP MODAL -->
-<div id="setup-overlay">
-  <div id="setup-box">
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:6px">⚡ SINCRONIZAÇÃO ONLINE</div>
-    <div style="font-size:13px;color:#5A6080;margin-bottom:20px">Configure uma vez. Todos acessam o mesmo link com dados sempre atualizados.</div>
-
-    <div style="background:#F8F9FC;border-radius:10px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.7">
-      <strong>Como configurar (1 vez, grátis):</strong><br>
-      1. Acesse <a href="https://jsonbin.io" target="_blank" style="color:#006EFF">jsonbin.io</a> e crie uma conta gratuita<br>
-      2. Clique em <strong>Create Bin</strong> → cole <code style="background:#E8EAF2;padding:1px 5px;border-radius:3px">{}</code> → Save<br>
-      3. Copie o <strong>Bin ID</strong> (ex: <code style="background:#E8EAF2;padding:1px 5px;border-radius:3px">64abc123def456</code>)<br>
-      4. Vá em <strong>API Keys</strong> → crie uma chave → copie<br>
-      5. Cole os dois campos abaixo e clique em Salvar
+<!-- GITHUB SETUP MODAL -->
+<div id="gh-setup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:#fff;border-radius:16px;padding:32px;width:500px;max-width:96%;box-shadow:0 24px 64px rgba(0,0,0,.2)">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:4px">⚡ SINCRONIZAÇÃO GITHUB</div>
+    <div style="font-size:13px;color:#5A6080;margin-bottom:20px">Dados salvos direto no repositório. Todos acessam sempre atualizado.</div>
+    <div style="background:#F8F9FC;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;line-height:1.8">
+      <strong>Como obter o Token:</strong><br>
+      1. GitHub → foto do perfil → <strong>Settings</strong><br>
+      2. Menu inferior → <strong>Developer settings</strong><br>
+      3. <strong>Personal access tokens → Tokens (classic)</strong><br>
+      4. <strong>Generate new token (classic)</strong><br>
+      5. Marque a permissão <code style="background:#E8EAF2;padding:1px 5px;border-radius:3px">repo</code> → Generate<br>
+      6. Copie o token e cole abaixo
     </div>
-
-    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
       <div>
-        <div style="font-size:11px;color:#9098B8;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">Bin ID</div>
-        <input class="inp" id="setup-binid" placeholder="64abc123def456789012abcd" style="font-family:'DM Mono',monospace">
+        <div style="font-size:11px;color:#9098B8;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">GitHub Token (ghp_...)</div>
+        <input class="inp" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" type="password">
       </div>
-      <div>
-        <div style="font-size:11px;color:#9098B8;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">API Key (Master Key)</div>
-        <input class="inp" id="setup-apikey" placeholder="$2a$10$..." type="password">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:11px;color:#9098B8;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Usuário GitHub</div>
+          <input class="inp" id="gh-owner" value="MalenaBarbosa">
+        </div>
+        <div>
+          <div style="font-size:11px;color:#9098B8;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Repositório</div>
+          <input class="inp" id="gh-repo" value="TRAVESSÃO-GERAL">
+        </div>
       </div>
     </div>
-
     <div style="display:flex;gap:10px">
-      <button class="btn btn-primary" onclick="saveCloudConfig()" style="flex:1;justify-content:center">✓ Salvar e Conectar</button>
-      <button class="btn" onclick="closeSetup()" style="flex:1;justify-content:center">Usar offline</button>
+      <button class="btn btn-primary" onclick="saveGHConfig()" style="flex:1;justify-content:center">✓ Conectar ao GitHub</button>
+      <button class="btn" onclick="closeGHSetup()" style="flex:1;justify-content:center">Cancelar</button>
     </div>
-    <div id="setup-msg" style="margin-top:10px;font-size:12px;color:#D92D20;display:none"></div>
+    <div id="gh-setup-msg" style="display:none;margin-top:10px;font-size:12px;color:#D92D20"></div>
   </div>
 </div>
 
@@ -3149,210 +3139,182 @@ function calcVencASO(){
 
 
 // ═══════════════════════════════════════════════════════════════
-// CLOUD SYNC ENGINE — JSONbin.io
-// ═══════════════════════════════════════════════════════════════
-const CLOUD_KEY = 'ihi_cloud';
-const SYNC_INTERVAL_MS = 60000; // sync every 60s
-let _syncTimer = null;
-let _lastSyncHash = '';
-let _syncBusy = false;
 
-function getCloudConfig(){
-  try{ return JSON.parse(localStorage.getItem(CLOUD_KEY)||'null'); }
+// ═══════════════════════════════════════════════════════════════
+// SYNC ENGINE — GitHub Repository API
+// Stores all data as sst_data.json in the same GitHub repo
+// Zero external services — everything stays in GitHub
+// ═══════════════════════════════════════════════════════════════
+const GH_KEY = 'ihi_github';
+let _ghSyncTimer = null;
+let _ghSyncBusy  = false;
+let _ghLastHash  = '';
+let _ghFileSha   = '';   // needed for GitHub file update API
+
+function getGHConfig(){
+  try{ return JSON.parse(localStorage.getItem(GH_KEY)||'null'); }
   catch{ return null; }
 }
-
-function cloudEnabled(){
-  const c = getCloudConfig();
-  return !!(c?.binId && c?.apiKey);
+function ghEnabled(){
+  const c=getGHConfig();
+  return !!(c?.token && c?.owner && c?.repo);
 }
 
-function setSyncStatus(state, msg){
-  const el = document.getElementById('sync-indicator');
-  const dot = el?.querySelector('.sync-dot');
-  const label = document.getElementById('sync-label');
+// ── Status indicator ─────────────────────────────────────────
+function setGHStatus(state, msg){
+  const el=document.getElementById('gh-status');
   if(!el) return;
-  el.className = 'offline';
-  if(dot){ dot.className='sync-dot'; }
-  if(state==='syncing'){ el.className='sync-indicator syncing'; if(dot) dot.className='sync-dot pulse'; }
-  else if(state==='ok'){ el.className='sync-indicator ok'; }
-  else if(state==='error'){ el.className='sync-indicator error'; }
-  if(label) label.textContent = msg||state;
+  const styles={
+    syncing:'background:#EFF6FF;color:#1E40AF;border-color:#BFDBFE',
+    ok:     'background:#F0FDF4;color:#166534;border-color:#BBF7D0',
+    error:  'background:#FEF2F2;color:#991B1B;border-color:#FECACA',
+    offline:'background:#F8F9FC;color:#9098B8;border-color:#E0E3EE',
+  };
+  el.style.cssText=`position:fixed;bottom:16px;right:16px;z-index:9999;padding:6px 14px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;border:1px solid;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:.3s;${styles[state]||styles.offline}`;
+  el.textContent = {syncing:'⟳ Sincronizando…', ok:'✓ '+msg, error:'✕ Erro — clique', offline:'⚡ '+msg}[state]||msg;
 }
 
-function buildSyncPayload(){
+// ── Build payload ────────────────────────────────────────────
+function buildGHPayload(){
   const KEY='ihi_';
   const keys=['emp','trn','aso','naoapl','empesc','brig','pad','dev','ferias','agend','deleted','dataVer'];
-  const payload={};
-  keys.forEach(k=>{ try{ payload[k]=JSON.parse(localStorage.getItem(KEY+k)||'null'); }catch{} });
-  payload._ts = Date.now();
-  return payload;
+  const p={_ts:Date.now(),_v:'10'};
+  keys.forEach(k=>{ try{ p[k]=JSON.parse(localStorage.getItem(KEY+k)||'null'); }catch{} });
+  return p;
 }
 
-function hashPayload(p){
-  // Simple hash: stringify key arrays lengths + last emp id
-  const e=p.emp||[]; const a=p.aso||[]; const t=p.trn||[];
-  return `${e.length}:${a.length}:${t.length}:${p._ts}`;
+function hashGH(p){
+  const e=p?.emp||[]; const a=p?.aso||[]; const t=p?.trn||[];
+  return `${e.length}:${a.length}:${t.length}`;
 }
 
-async function syncToCloud(force=false){
-  if(_syncBusy) return;
-  const cfg=getCloudConfig();
-  if(!cfg?.binId||!cfg?.apiKey) return;
-
-  _syncBusy=true;
-  setSyncStatus('syncing','Sincronizando…');
-
+// ── Core sync ────────────────────────────────────────────────
+async function ghSync(force=false){
+  if(_ghSyncBusy) return;
+  const cfg=getGHConfig();
+  if(!cfg?.token||!cfg?.owner||!cfg?.repo) return;
+  _ghSyncBusy=true;
+  setGHStatus('syncing','');
+  const headers={
+    'Authorization':'token '+cfg.token,
+    'Accept':'application/vnd.github.v3+json',
+    'Content-Type':'application/json'
+  };
+  const apiBase=`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/sst_data.json`;
   try{
-    // 1. GET current cloud data
-    const getResp = await fetch(`https://api.jsonbin.io/v3/b/${cfg.binId}/latest`,{
-      headers:{'X-Master-Key':cfg.apiKey,'X-Bin-Meta':'false'}
-    });
+    // 1. GET current file from GitHub
+    const getR=await fetch(apiBase,{headers});
+    let cloudData=null;
+    if(getR.ok){
+      const meta=await getR.json();
+      _ghFileSha=meta.sha;
+      cloudData=JSON.parse(atob(meta.content.split('\n').join('')));
+    } else if(getR.status!==404){
+      throw new Error('GET '+getR.status);
+    }
 
-    if(!getResp.ok) throw new Error(`GET ${getResp.status}`);
-    const cloudData = await getResp.json();
+    const localPayload=buildGHPayload();
+    const cloudTs=cloudData?._ts||0;
+    const localTs=parseInt(localStorage.getItem('ihi__ghTs')||'0');
 
-    const cloudTs = cloudData._ts||0;
-    const localPayload = buildSyncPayload();
-    const localTs = parseInt(localStorage.getItem('ihi__localTs')||'0');
-
-    // 2. Merge: if cloud is newer, pull from cloud; else push local
-    if(cloudTs > localTs && !force){
-      // Cloud is newer — apply cloud data locally
-      applyCloudData(cloudData);
-      _lastSyncHash = hashPayload(cloudData);
-      setSyncStatus('ok', `Sincronizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`);
+    if(cloudData && cloudTs > localTs && !force){
+      // Cloud is newer → apply locally
+      applyGHData(cloudData);
+      _ghLastHash=hashGH(cloudData);
+      setGHStatus('ok', new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
     } else {
-      // Local is newer — push to cloud
-      const h = hashPayload(localPayload);
-      if(h===_lastSyncHash && !force){
-        setSyncStatus('ok',`Atualizado ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`);
-        _syncBusy=false; return;
+      // Local is newer → push to GitHub
+      const h=hashGH(localPayload);
+      if(h===_ghLastHash && !force){
+        setGHStatus('ok', new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+        _ghSyncBusy=false; return;
       }
-      const putResp = await fetch(`https://api.jsonbin.io/v3/b/${cfg.binId}`,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json','X-Master-Key':cfg.apiKey,'X-Bin-Versioning':'false'},
-        body:JSON.stringify(localPayload)
-      });
-      if(!putResp.ok) throw new Error(`PUT ${putResp.status}`);
-      _lastSyncHash = h;
-      localStorage.setItem('ihi__localTs', String(localPayload._ts));
-      setSyncStatus('ok',`Salvo ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`);
+      const content=btoa(unescape(encodeURIComponent(JSON.stringify(localPayload))));
+      const body={message:'SST sync '+new Date().toISOString().slice(0,16), content};
+      if(_ghFileSha) body.sha=_ghFileSha;
+      const putR=await fetch(apiBase,{method:'PUT',headers,body:JSON.stringify(body)});
+      if(!putR.ok) throw new Error('PUT '+putR.status);
+      const putData=await putR.json();
+      _ghFileSha=putData.content?.sha||_ghFileSha;
+      _ghLastHash=h;
+      localStorage.setItem('ihi__ghTs',String(localPayload._ts));
+      setGHStatus('ok', new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
     }
   } catch(err){
-    console.warn('Sync error:', err.message);
-    setSyncStatus('error','Erro — clique para tentar');
+    console.warn('GitHub sync error:',err.message);
+    setGHStatus('error','');
   }
-  _syncBusy=false;
+  _ghSyncBusy=false;
 }
 
-function applyCloudData(data){
+function applyGHData(data){
   const KEY='ihi_';
   const keys=['emp','trn','aso','naoapl','empesc','brig','pad','dev','ferias','agend','deleted','dataVer'];
-  keys.forEach(k=>{
-    if(data[k]!==undefined && data[k]!==null){
-      localStorage.setItem(KEY+k, typeof data[k]==='string'?data[k]:JSON.stringify(data[k]));
-    }
-  });
-  localStorage.setItem('ihi__localTs', String(data._ts||Date.now()));
-  // Refresh UI
+  keys.forEach(k=>{ if(data[k]!=null) localStorage.setItem(KEY+k, JSON.stringify(data[k])); });
+  localStorage.setItem('ihi__ghTs',String(data._ts||Date.now()));
   renderView(currentView);
   updateNavBadge();
 }
 
-function forcSync(){
-  syncToCloud(true);
+let _ghDebTimer=null;
+function scheduleGHSync(){
+  localStorage.setItem('ihi__ghTs',String(Date.now()));
+  if(_ghDebTimer) clearTimeout(_ghDebTimer);
+  _ghDebTimer=setTimeout(()=>ghSync(),3000);
 }
 
-function startSyncTimer(){
-  if(_syncTimer) clearInterval(_syncTimer);
-  if(!cloudEnabled()){ setSyncStatus('offline','Offline — clique para configurar'); return; }
-  syncToCloud();
-  _syncTimer = setInterval(()=>syncToCloud(), SYNC_INTERVAL_MS);
+function startGHSync(){
+  if(!ghEnabled()){ setGHStatus('offline','Clique para conectar'); return; }
+  ghSync();
+  if(_ghSyncTimer) clearInterval(_ghSyncTimer);
+  _ghSyncTimer=setInterval(()=>ghSync(),60000);
 }
 
-// Patch existing save functions to trigger cloud sync after each save
-// Runs after all functions are defined (via setTimeout in init)
-function patchSaveFunctions(){
-  const patchFn=(name)=>{
-    const orig=window[name];
-    if(!orig||orig._patched) return;
-    window[name]=function(v){ orig(v); scheduleSync(); };
-    window[name]._patched=true;
-  };
-  ['saveEmpregados','saveTreinamentos','saveASO','saveNaoApl',
-   'saveFerias','saveEmpEscala','saveBrigada','savePadrinhos',
-   'saveDesvios','saveAgendamentos'].forEach(patchFn);
+// ── Setup modal ──────────────────────────────────────────────
+function openGHSetup(){
+  const cfg=getGHConfig()||{};
+  document.getElementById('gh-token').value=cfg.token||'';
+  document.getElementById('gh-owner').value=cfg.owner||'MalenaBarbosa';
+  document.getElementById('gh-repo').value=cfg.repo||'TRAVESSÃO-GERAL';
+  document.getElementById('gh-setup-overlay').classList.add('open');
 }
-
-let _scheduleTimer=null;
-function scheduleSync(){
-  localStorage.setItem('ihi__localTs', String(Date.now()));
-  if(_scheduleTimer) clearTimeout(_scheduleTimer);
-  _scheduleTimer = setTimeout(()=>syncToCloud(), 2000); // debounce 2s after last save
+function closeGHSetup(){
+  document.getElementById('gh-setup-overlay').classList.remove('open');
 }
-
-// ── Setup modal controls ──────────────────────────────────────
-function openSetup(){
-  const cfg=getCloudConfig()||{};
-  document.getElementById('setup-binid').value=cfg.binId||'';
-  document.getElementById('setup-apikey').value=cfg.apiKey||'';
-  document.getElementById('setup-overlay').classList.add('open');
-}
-
-function closeSetup(){
-  document.getElementById('setup-overlay').classList.remove('open');
-}
-
-async function saveCloudConfig(){
-  const binId=(document.getElementById('setup-binid').value||'').trim();
-  const apiKey=(document.getElementById('setup-apikey').value||'').trim();
-  const msg=document.getElementById('setup-msg');
-  if(!binId||!apiKey){
-    msg.style.display='block'; msg.textContent='Preencha os dois campos.'; return;
-  }
+async function saveGHConfig(){
+  const token=(document.getElementById('gh-token').value||'').trim();
+  const owner=(document.getElementById('gh-owner').value||'').trim();
+  const repo =(document.getElementById('gh-repo').value||'').trim();
+  const msg  = document.getElementById('gh-setup-msg');
+  if(!token||!owner||!repo){ msg.style.display='block'; msg.textContent='Preencha todos os campos.'; return; }
   msg.style.display='none';
-  // Test connection
+  setGHStatus('syncing','Testando…');
   try{
-    setSyncStatus('syncing','Testando conexão…');
-    const r=await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`,{
-      headers:{'X-Master-Key':apiKey,'X-Bin-Meta':'false'}
+    const r=await fetch(`https://api.github.com/repos/${owner}/${repo}`,{
+      headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}
     });
-    if(r.status===200||r.status===404){
-      localStorage.setItem(CLOUD_KEY, JSON.stringify({binId,apiKey}));
-      closeSetup();
-      // Initialize bin with current data if empty (404)
-      if(r.status===404){
-        await fetch(`https://api.jsonbin.io/v3/b/${binId}`,{
-          method:'PUT',
-          headers:{'Content-Type':'application/json','X-Master-Key':apiKey,'X-Bin-Versioning':'false'},
-          body:JSON.stringify(buildSyncPayload())
-        });
-      }
-      startSyncTimer();
-    } else {
-      msg.style.display='block';
-      msg.textContent=`Erro ${r.status} — verifique o Bin ID e a API Key.`;
-      setSyncStatus('error','Configuração inválida');
-    }
+    if(!r.ok) throw new Error('Token ou repositório inválido ('+r.status+')');
+    localStorage.setItem(GH_KEY,JSON.stringify({token,owner,repo}));
+    closeGHSetup();
+    startGHSync();
   } catch(e){
     msg.style.display='block';
-    msg.textContent='Erro de rede: '+e.message;
-    setSyncStatus('error','Sem conexão');
+    msg.textContent='❌ '+e.message;
+    setGHStatus('error','');
   }
 }
 
-function disconnectCloud(){
-  localStorage.removeItem(CLOUD_KEY);
-  if(_syncTimer) clearInterval(_syncTimer);
-  setSyncStatus('offline','Offline');
+// Patch save functions to trigger sync
+function patchSaveFunctions(){
+  ['saveEmpregados','saveTreinamentos','saveASO','saveNaoApl',
+   'saveFerias','saveEmpEscala','saveBrigada','savePadrinhos',
+   'saveDesvios','saveAgendamentos'].forEach(name=>{
+    const orig=window[name];
+    if(!orig||orig._ghPatched) return;
+    window[name]=function(v){ orig(v); scheduleGHSync(); };
+    window[name]._ghPatched=true;
+  });
 }
-
-// Click on sync indicator opens setup if offline, forces sync if connected
-document.addEventListener('DOMContentLoaded',()=>{
-  const si=document.getElementById('sync-indicator');
-  if(si) si.onclick=()=>{ if(cloudEnabled()) forcSync(); else openSetup(); };
-});
 
 function exportarDados(){
   const KEY='ihi_';
@@ -3480,8 +3442,7 @@ function preloadInHausData(){
 preloadInHausData();
 filterDeletedEmployees();
 setDate();
-// Start cloud sync if configured
-setTimeout(()=>{ patchSaveFunctions(); startSyncTimer(); }, 1500);
+setTimeout(()=>{ patchSaveFunctions(); startGHSync(); }, 1500);
 updateNavBadge();
 const _now=new Date(); calYear=_now.getFullYear(); calMonth=_now.getMonth()+1;
 renderDashboard();
