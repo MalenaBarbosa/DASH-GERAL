@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0F1623">
+<title>Portal SST — In Haus Industrial</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F4F6FB;--surface:#FFFFFF;--surface2:#F0F3FA;
+  --border:#E4E8F4;--text:#0F1623;--text2:#5A6280;--text3:#9098B8;
+  --blue:#1A6BFF;--blue-dim:rgba(26,107,255,.08);
+  --green:#16A34A;--green-dim:#DCFCE7;
+  --orange:#EA580C;--orange-dim:#FEF3C7;
+  --red:#DC2626;--red-dim:#FEE2E2;
+  --purple:#7C3AED;--purple-dim:#EDE9FE;
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.app-header{background:linear-gradient(135deg,#0F1623 0%,#1A2540 100%);padding:20px 20px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.logo-mark{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff}
+.header-title{font-size:15px;font-weight:700;color:#fff}
+.header-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+
+/* ── TAB BAR ── */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid rgba(255,255,255,.1)}
+.tab{flex:1;padding:12px 8px;text-align:center;font-size:11px;font-weight:600;color:rgba(255,255,255,.45);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab.active{color:#fff;border-bottom-color:var(--blue)}
+.tab-icon{font-size:18px}
+.badge-dot{display:inline-block;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;margin-left:4px;font-weight:700;vertical-align:middle}
+
+/* ── SCREENS ── */
+.screen{display:none;padding:16px;min-height:calc(100vh - 120px)}
+.screen.active{display:block}
+
+/* ── LOGIN ── */
+#screen-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(160deg,#0F1623 0%,#1A2540 50%,#0F1623 100%)}
+.login-logo{width:72px;height:72px;background:var(--blue);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;box-shadow:0 8px 32px rgba(26,107,255,.4)}
+.login-title{font-size:24px;font-weight:800;color:#fff;margin-bottom:6px;text-align:center}
+.login-sub{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:32px;text-align:center}
+.login-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;width:100%;max-width:380px;backdrop-filter:blur(10px)}
+.login-label{font-size:12px;color:rgba(255,255,255,.6);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.login-input{width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:14px 16px;font-size:16px;color:#fff;font-family:'Inter',sans-serif;outline:none;transition:.2s}
+.login-input:focus{border-color:var(--blue);background:rgba(255,255,255,.12)}
+.login-input::placeholder{color:rgba(255,255,255,.3)}
+.login-btn{width:100%;margin-top:16px;background:var(--blue);border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;transition:.2s;font-family:'Inter',sans-serif}
+.login-btn:active{transform:scale(.98);background:#1557DD}
+.login-suggestions{margin-top:12px;max-height:180px;overflow-y:auto;border-radius:12px;background:rgba(255,255,255,.08);display:none}
+.suggestion-item{padding:12px 16px;font-size:14px;color:rgba(255,255,255,.8);cursor:pointer;border-bottom:1px solid rgba(255,255,255,.06);transition:.15s}
+.suggestion-item:last-child{border-bottom:none}
+.suggestion-item:active{background:rgba(255,255,255,.1)}
+.login-error{margin-top:12px;background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#FCA5A5;display:none}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card-header{padding:16px;display:flex;align-items:center;gap:12px}
+.card-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.card-title{font-size:15px;font-weight:700;color:var(--text)}
+.card-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.card-body{padding:0 16px 16px}
+
+/* ── ASO CHIP ── */
+.aso-chip{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid var(--border)}
+.aso-chip.urgent{background:var(--red-dim);border-color:#FECACA}
+.aso-chip.warn{background:var(--orange-dim);border-color:#FDE68A}
+.aso-chip.ok{background:var(--green-dim);border-color:#BBF7D0}
+.chip-left{flex:1}
+.chip-tipo{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.chip-date{font-size:18px;font-weight:800;color:var(--text)}
+.chip-detail{font-size:12px;color:var(--text2);margin-top:2px}
+.chip-right{text-align:right}
+.chip-days{font-size:24px;font-weight:800;line-height:1}
+.chip-days-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+/* ── CONFIRM BUTTON ── */
+.confirm-btn{width:100%;background:linear-gradient(135deg,#1A6BFF,#0D4FCC);border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;color:#fff;cursor:pointer;margin-top:10px;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s}
+.confirm-btn:active{transform:scale(.98)}
+.confirm-btn.confirmed{background:linear-gradient(135deg,#16A34A,#166534)}
+.confirm-btn:disabled{opacity:.6;cursor:default}
+
+/* ── TRAINING LIST ── */
+.trn-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.trn-item:last-child{border-bottom:none}
+.trn-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.trn-name{font-size:13px;font-weight:600;color:var(--text);flex:1;line-height:1.3}
+.trn-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.trn-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.b-ok{background:var(--green-dim);color:#166534}
+.b-warn{background:var(--orange-dim);color:#92400E}
+.b-danger{background:var(--red-dim);color:#991B1B}
+.b-pend{background:var(--surface2);color:var(--text3)}
+
+
+
+/* ── WELCOME ── */
+.welcome-banner{background:linear-gradient(135deg,#0F1623,#1A2540);border-radius:var(--radius);padding:20px;margin-bottom:16px;color:#fff}
+.welcome-name{font-size:22px;font-weight:800;margin-bottom:2px}
+.welcome-cargo{font-size:13px;opacity:.6}
+.welcome-turno{display:inline-block;margin-top:10px;background:rgba(26,107,255,.3);border:1px solid rgba(26,107,255,.4);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:#93C5FD}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.kpi-mini{background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border);padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kpi-mini-val{font-size:28px;font-weight:800;line-height:1}
+.kpi-mini-label{font-size:11px;color:var(--text2);margin-top:4px}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:32px 16px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-text{font-size:14px}
+
+/* ── UTILS ── */
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+
+/* ── BOTTOM SAFE AREA ── */
+.safe-bottom{height:env(safe-area-inset-bottom, 16px)}
+</style>
+</head>
+<body>
+
+<!-- ════════════ LOGIN ════════════ -->
+<div id="screen-login">
+  <div class="login-logo">🛡</div>
+  <div class="login-title">Portal SST</div>
+  <div class="login-sub">In Haus Industrial · Samarco Ubu</div>
+  <div class="login-card">
+    <div class="login-label">Seu nome</div>
+    <input class="login-input" id="login-input" type="text" placeholder="Digite seu nome completo..."
+      oninput="filterSuggestions(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="login-suggestions" id="login-suggestions"></div>
+    <div class="login-error" id="login-error">Nome não encontrado. Verifique com o responsável SST.</div>
+    <button class="login-btn" onclick="doLogin()">Acessar →</button>
+  </div>
+</div>
+
+<!-- ════════════ APP ════════════ -->
+<div id="app" style="display:none">
+  <!-- Header -->
+  <div class="app-header">
+    <div class="header-top">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="logo-mark">IH</div>
+        <div>
+          <div class="header-title">Portal SST</div>
+          <div class="header-sub">In Haus Industrial</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.4);cursor:pointer" onclick="doLogout()">Sair</div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" onclick="showTab('inicio')" id="tab-inicio">
+        <span class="tab-icon">🏠</span>Início
+      </div>
+      <div class="tab" onclick="showTab('aso')" id="tab-aso">
+        <span class="tab-icon">🩺</span>Exames<span class="badge-dot" id="aso-badge" style="display:none">!</span>
+      </div>
+      <div class="tab" onclick="showTab('treinamentos')" id="tab-treinamentos">
+        <span class="tab-icon">📋</span>Treinamentos
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── INÍCIO ── -->
+  <div class="screen active" id="screen-inicio">
+    <div class="welcome-banner" id="welcome-banner">
+      <div class="welcome-name" id="emp-name-display">Olá!</div>
+      <div class="welcome-cargo" id="emp-cargo-display"></div>
+      <div class="welcome-turno" id="emp-turno-display"></div>
+    </div>
+    <div class="kpi-row" id="kpi-inicio"></div>
+    <p class="section-title">Próximos eventos</p>
+    <div id="proximos-eventos"></div>
+    <div class="safe-bottom"></div>
+  </div>
+
+  <!-- ── ASO ── -->
+  <div class="screen" id="screen-aso">
+    <p class="section-title">Exames agendados</p>
+    <div id="aso-agendados"></div>
+    <div class="divider"></div>
+    <p class="section-title">Situação dos exames</p>
+    <div id="aso-situacao"></div>
+    <div class="safe-bottom"></div>
+  </div>
+
+  <!-- ── TREINAMENTOS ── -->
+  <div class="screen" id="screen-treinamentos">
+    <p class="section-title">Treinamentos pendentes / vencidos</p>
+    <div id="trn-pendentes"></div>
+    <div class="divider"></div>
+    <p class="section-title">Treinamentos em dia</p>
+    <div id="trn-emdia"></div>
+    <div class="safe-bottom"></div>
+  </div>
+
+
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA — loaded from main SST Manager
+// ══════════════════════════════════════════
+const KEY = 'ihi_';
+let ALL_EMP=[], ALL_ASO=[], ALL_TRN=[], ALL_AGEND=[], ALL_DEV=[];
+let currentEmp = null;
+
+function loadData(){
+  try{
+    ALL_EMP   = JSON.parse(localStorage.getItem(KEY+'emp')   ||'[]');
+    ALL_ASO   = JSON.parse(localStorage.getItem(KEY+'aso')   ||'[]');
+    ALL_TRN   = JSON.parse(localStorage.getItem(KEY+'trn')   ||'[]');
+    ALL_AGEND = JSON.parse(localStorage.getItem(KEY+'agend') ||'[]');
+    ALL_DEV   = JSON.parse(localStorage.getItem(KEY+'dev')   ||'[]');
+  }catch(e){ console.error(e); }
+}
+
+// ── Date utils ──────────────────────────
+function today(){ return new Date().toISOString().split('T')[0]; }
+function daysDiff(ds){
+  if(!ds) return null;
+  const d = new Date(ds+'T12:00:00');
+  const now = new Date(); now.setHours(12,0,0,0);
+  return Math.round((d-now)/86400000);
+}
+function fmtDate(ds){
+  if(!ds) return '—';
+  const [y,m,d] = ds.split('-');
+  return `${d}/${m}/${y}`;
+}
+function fmtDateLong(ds){
+  if(!ds) return '—';
+  const months=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const [y,m,d] = ds.split('-');
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+// ── Normalization ────────────────────────
+function normName(s){
+  return String(s||'').toUpperCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ');
+}
+
+// ── Login ────────────────────────────────
+function filterSuggestions(val){
+  loadData();
+  const sug = document.getElementById('login-suggestions');
+  const err = document.getElementById('login-error');
+  err.style.display='none';
+  if(val.length < 2){ sug.style.display='none'; return; }
+  const q = normName(val);
+  const matches = ALL_EMP.filter(e => normName(e.nome).includes(q)).slice(0,6);
+  if(!matches.length){ sug.style.display='none'; return; }
+  sug.style.display='block';
+  sug.innerHTML = matches.map(e =>
+    `<div class="suggestion-item" onclick="selectEmp('${e.id}')">${e.nome} <span style="opacity:.5;font-size:12px">· ${e.cargo}</span></div>`
+  ).join('');
+}
+
+function selectEmp(id){
+  const emp = ALL_EMP.find(e=>String(e.id)===String(id));
+  if(!emp) return;
+  document.getElementById('login-input').value = emp.nome;
+  document.getElementById('login-suggestions').style.display='none';
+  currentEmp = emp;
+  enterApp();
+}
+
+function doLogin(){
+  loadData();
+  const val = document.getElementById('login-input').value.trim();
+  if(!val){ return; }
+  const q = normName(val);
+  let emp = ALL_EMP.find(e=>normName(e.nome)===q);
+  if(!emp) emp = ALL_EMP.find(e=>normName(e.nome).includes(q));
+  if(!emp){
+    document.getElementById('login-error').style.display='block';
+    return;
+  }
+  currentEmp = emp;
+  enterApp();
+}
+
+function renderAll(){
+  if(!currentEmp) return;
+  const e=currentEmp;
+  const nameEl=document.getElementById('emp-name-display');
+  const cargoEl=document.getElementById('emp-cargo-display');
+  const turnoEl=document.getElementById('emp-turno-display');
+  if(nameEl) nameEl.textContent=e.nome.split(' ').slice(0,2).join(' ');
+  if(cargoEl) cargoEl.textContent=e.cargo||'';
+  if(turnoEl){ turnoEl.textContent=e.turno||''; turnoEl.style.display=e.turno?'inline-block':'none'; }
+  renderInicio();
+  renderASO();
+  renderTreinamentos();
+}
+
+function enterApp(){
+  localStorage.setItem('portal_lastEmp', String(currentEmp.id));
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('app').style.display='block';
+  renderAll();
+}
+
+function doLogout(){
+  currentEmp=null;
+  localStorage.removeItem('portal_lastEmp');
+  document.getElementById('app').style.display='none';
+  document.getElementById('screen-login').style.display='flex';
+  document.getElementById('login-input').value='';
+}
+
+// Auto-login if previously logged in
+window.addEventListener('DOMContentLoaded',()=>{
+  loadData();
+  const lastId = localStorage.getItem('portal_lastEmp');
+  if(lastId && ALL_EMP.length){
+    const emp = ALL_EMP.find(e=>String(e.id)===lastId);
+    if(emp){ currentEmp=emp; enterApp(); return; }
+  }
+  // If no data in localStorage yet, show note
+  if(!ALL_EMP.length){
+    const err=document.getElementById('login-error');
+    if(err){ err.style.display='block'; err.style.background='rgba(26,107,255,.15)'; err.style.color='#93C5FD'; err.style.borderColor='rgba(26,107,255,.3)';
+      err.textContent='⚠️ Dados ainda não carregados. Abra primeiro o sistema SST Manager no mesmo navegador.'; }
+  }
+});
+
+// ── Tab navigation ───────────────────────
+function showTab(tab){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ── Avatar color ─────────────────────────
+const COLORS=['#1A6BFF','#7C3AED','#059669','#D97706','#DC2626','#0891B2','#BE185D'];
+
+
+// ── INÍCIO ───────────────────────────────
+function renderInicio(){
+  const empId = String(currentEmp.id);
+  const myAso   = ALL_ASO.filter(a=>String(a.empId)===empId&&a.tipo==='Periódico');
+  const myTrn   = ALL_TRN.filter(t=>String(t.empId)===empId);
+  const myAgend = ALL_AGEND.filter(a=>String(a.empId)===empId);
+
+  let asoOk=0,asoWarn=0,asoVenc=0;
+  myAso.forEach(a=>{ const d=daysDiff(a.vencimento);
+    if(d===null) return;
+    if(d<0)asoVenc++; else if(d<=60)asoWarn++; else asoOk++;
+  });
+  let trnVenc=0,trnWarn=0;
+  myTrn.forEach(t=>{ if(!t.vencimento) return;
+    const d=daysDiff(t.vencimento);
+    if(d<0)trnVenc++; else if(d<=60)trnWarn++;
+  });
+
+  // ASO badge
+  const asoBadge = document.getElementById('aso-badge');
+  if(asoVenc+asoWarn>0){ asoBadge.style.display='inline'; asoBadge.textContent=asoVenc+asoWarn; }
+
+  // KPIs
+  document.getElementById('kpi-inicio').innerHTML=`
+    <div class="kpi-mini">
+      <div class="kpi-mini-val" style="color:${asoVenc>0?'#DC2626':asoWarn>0?'#EA580C':'#16A34A'}">${asoVenc>0?asoVenc:asoWarn>0?asoWarn:asoOk}</div>
+      <div class="kpi-mini-label">${asoVenc>0?'ASO Vencido':asoWarn>0?'ASO Vencendo':'ASOs em dia'}</div>
+    </div>
+    <div class="kpi-mini">
+      <div class="kpi-mini-val" style="color:${trnVenc>0?'#DC2626':trnWarn>0?'#EA580C':'#16A34A'}">${trnVenc>0?trnVenc:trnWarn>0?trnWarn:(myTrn.filter(t=>t.vencimento&&daysDiff(t.vencimento)>=0).length)}</div>
+      <div class="kpi-mini-label">${trnVenc>0?'Trein. Vencido':trnWarn>0?'Trein. Vencendo':'Treinos em dia'}</div>
+    </div>`;
+
+  // Proximos eventos
+  const events = [];
+  myAgend.forEach(ag=>{
+    const d=daysDiff(ag.dataAgend);
+    if(d!==null&&d>=-1&&d<=30)
+      events.push({tipo:'ASO',label:ag.periodicidade,date:ag.dataAgend,days:d,
+        confirmed:ag.status==='confirmado_emp', agId:ag.id});
+  });
+  myAso.forEach(a=>{
+    const d=daysDiff(a.vencimento);
+    if(d!==null&&d>=0&&d<=30)
+      events.push({tipo:'Vencimento',label:a.periodicidade,date:a.vencimento,days:d});
+  });
+  events.sort((a,b)=>a.days-b.days);
+
+  const el=document.getElementById('proximos-eventos');
+  if(!events.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">Nenhum evento próximo.<br>Tudo em dia!</div></div>';
+    return;
+  }
+  el.innerHTML = events.slice(0,5).map(ev=>{
+    const isUrgent=ev.days<=3;
+    const cls=isUrgent?'urgent':ev.days<=14?'warn':'ok';
+    return `<div class="aso-chip ${cls}">
+      <div class="chip-left">
+        <div class="chip-tipo" style="color:${isUrgent?'#DC2626':ev.days<=14?'#EA580C':'#16A34A'}">${ev.tipo} · ${ev.label}</div>
+        <div class="chip-date">${fmtDateLong(ev.date)}</div>
+        ${ev.tipo==='ASO'&&ev.confirmed?'<div style="font-size:11px;color:#16A34A;margin-top:3px;font-weight:600">✓ Presença confirmada</div>':''}
+      </div>
+      <div class="chip-right">
+        <div class="chip-days" style="color:${isUrgent?'#DC2626':ev.days<=14?'#EA580C':'#16A34A'}">${ev.days===0?'HOJE':ev.days===1?'AMANHÃ':ev.days+'d'}</div>
+        <div class="chip-days-label">${ev.days>1?'restantes':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── ASO ──────────────────────────────────
+function renderASO(){
+  const empId = String(currentEmp.id);
+  const myAgend = ALL_AGEND.filter(a=>String(a.empId)===empId);
+  const myAso   = ALL_ASO.filter(a=>String(a.empId)===empId&&a.tipo==='Periódico');
+
+  // Agendados
+  const agEl = document.getElementById('aso-agendados');
+  if(!myAgend.length){
+    agEl.innerHTML='<div class="empty" style="padding:20px 0"><div class="empty-icon">📅</div><div class="empty-text">Nenhum exame agendado.</div></div>';
+  } else {
+    agEl.innerHTML = myAgend.map(ag=>{
+      const d=daysDiff(ag.dataAgend);
+      const cls=d<0?'urgent':d<=7?'warn':'ok';
+      const confirmed = ag.status==='confirmado_emp';
+      return `<div class="aso-chip ${cls}">
+        <div class="chip-left">
+          <div class="chip-tipo" style="color:${d<0?'#DC2626':d<=7?'#EA580C':'#16A34A'}">${ag.periodicidade==='Semestral'?'🎧 Audiometria':'🩺 Periódico Anual'}</div>
+          <div class="chip-date">${fmtDateLong(ag.dataAgend)}</div>
+          <div class="chip-detail">Turno: ${ag.turno||'—'} ${ag.horario?'· '+ag.horario:''}</div>
+          ${ag.clinica?`<div class="chip-detail">📍 ${ag.clinica}</div>`:''}
+          ${ag.dataVenc?`<div style="font-size:11px;color:var(--text3);margin-top:3px">Vence: ${fmtDate(ag.dataVenc)}</div>`:''}
+        </div>
+        <div class="chip-right" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div>
+            <div class="chip-days" style="color:${d<0?'#DC2626':d<=7?'#EA580C':'#16A34A'}">${d===0?'HOJE':d===1?'AMANHÃ':d<0?Math.abs(d)+'d':d+'d'}</div>
+            <div class="chip-days-label">${d<0?'vencido':d>1?'restantes':''}</div>
+          </div>
+        </div>
+      </div>
+      ${!confirmed?`<button class="confirm-btn" onclick="confirmarPresenca('${ag.id}',this)" id="btn-conf-${ag.id}">
+        ✋ Confirmar presença
+      </button>`:`<div style="text-align:center;padding:8px;font-size:13px;color:#16A34A;font-weight:600">✓ Presença confirmada</div>`}`;
+    }).join('<div class="divider"></div>');
+  }
+
+  // Situação ASOs
+  const sitEl = document.getElementById('aso-situacao');
+  sitEl.innerHTML = myAso.map(a=>{
+    const d=daysDiff(a.vencimento);
+    const cls=d===null?'b-pend':d<0?'b-danger':d<=60?'b-warn':'b-ok';
+    const label=d===null?'—':d<0?'Vencido '+Math.abs(d)+'d':d===0?'Hoje':d+'d';
+    return `<div class="aso-chip" style="margin-bottom:8px">
+      <div class="chip-left">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">${a.periodicidade}</div>
+        <div style="font-size:14px;font-weight:600">${a.exame||'Periódico'}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">Último: ${fmtDate(a.data||'')}</div>
+      </div>
+      <div class="chip-right">
+        <span class="trn-badge ${cls}" style="font-size:12px;padding:5px 10px">${label}</span>
+        ${a.vencimento?`<div style="font-size:11px;color:var(--text3);margin-top:4px">Vence ${fmtDate(a.vencimento)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Confirm presence
+function confirmarPresenca(agId, btn){
+  const ag = ALL_AGEND.find(a=>String(a.id)===String(agId));
+  if(!ag) return;
+  ag.status='confirmado_emp';
+  ag.confirmedAt = new Date().toISOString();
+  localStorage.setItem(KEY+'agend', JSON.stringify(ALL_AGEND));
+  btn.textContent='✅ Confirmado!';
+  btn.classList.add('confirmed');
+  btn.disabled=true;
+  setTimeout(()=>{ renderAll(); showTab('aso'); },800);
+}
+
+// ── TREINAMENTOS ────────────────────────
+function renderTreinamentos(){
+  const empId = String(currentEmp.id);
+  const myTrn = ALL_TRN.filter(t=>String(t.empId)===empId);
+
+  const pendentes=[], emdia=[];
+  myTrn.forEach(t=>{
+    if(!t.vencimento){ pendentes.push({...t, _status:'pendente'}); return; }
+    const d=daysDiff(t.vencimento);
+    if(d<0) pendentes.push({...t, _status:'vencido', _days:d});
+    else if(d<=60) pendentes.push({...t, _status:'vencendo', _days:d});
+    else emdia.push({...t, _status:'ok', _days:d});
+  });
+  pendentes.sort((a,b)=>(a._days||0)-(b._days||0));
+
+  const pEl=document.getElementById('trn-pendentes');
+  if(!pendentes.length){
+    pEl.innerHTML='<div class="empty" style="padding:16px 0"><div class="empty-icon">✅</div><div class="empty-text">Todos em dia!</div></div>';
+  } else {
+    pEl.innerHTML='<div class="card"><div class="card-body" style="padding-top:12px">'+
+      pendentes.map(t=>{
+        const cls=t._status==='vencido'?'b-danger':t._status==='vencendo'?'b-warn':'b-pend';
+        const dot=t._status==='vencido'?'#DC2626':t._status==='vencendo'?'#EA580C':'#9098B8';
+        const label=t._status==='vencido'?`Vencido ${Math.abs(t._days)}d`:t._status==='vencendo'?`${t._days}d`:t.validade?`${t.validade}m`:'Indeterminado';
+        return `<div class="trn-item">
+          <div class="trn-dot" style="background:${dot}"></div>
+          <div style="flex:1">
+            <div class="trn-name">${t.nome}</div>
+            <div class="trn-meta">${t.realizado?'Realizado: '+fmtDate(t.realizado):'Não realizado'}</div>
+          </div>
+          <span class="trn-badge ${cls}">${label}</span>
+        </div>`;
+      }).join('')+'</div></div>';
+  }
+
+  const dEl=document.getElementById('trn-emdia');
+  if(!emdia.length){
+    dEl.innerHTML='';
+  } else {
+    dEl.innerHTML='<div class="card"><div class="card-body" style="padding-top:12px">'+
+      emdia.slice(0,20).map(t=>`<div class="trn-item">
+        <div class="trn-dot" style="background:#16A34A"></div>
+        <div style="flex:1">
+          <div class="trn-name">${t.nome}</div>
+          <div class="trn-meta">Vence: ${fmtDate(t.vencimento)}</div>
+        </div>
+        <span class="trn-badge b-ok">${t._days}d</span>
+      </div>`).join('')+
+      (emdia.length>20?`<div style="text-align:center;padding:10px;font-size:12px;color:var(--text3)">+${emdia.length-20} treinamentos</div>`:'')+
+      '</div></div>';
+  }
+}
+
+
+</script>
+</body>
+</html>
