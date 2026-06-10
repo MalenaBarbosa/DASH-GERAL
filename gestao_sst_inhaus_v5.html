@@ -3168,36 +3168,37 @@ function filterCtEmp(){
 
   const AVG_COLORS=['#1A6BFF','#7C3AED','#059669','#D97706','#DC2626','#0891B2'];
 
-  // Direct onclick on each row — works on file:// and https://
-  el.innerHTML = list.map((emp,i)=>{
+  // Store list in global so rows can reference by index (no quote issues in onclick)
+  window._ctEmpList = list;
+  const rows = list.map((emp,i)=>{
     const st = getEmpStatus(emp);
-    const isSelected = selIds.has(String(emp.id));
-    const statusDot = st.cat==='vencido'?'🔴':st.cat==='vencendo'?'🟡':st.cat==='ok'?'🟢':'⚪';
-    const statusTxt = st.cat==='vencido'?'Vencido '+Math.abs(st.dias)+'d'
-      :st.cat==='vencendo'?'Vence em '+st.dias+'d'
-      :st.cat==='ok'?'Em dia ('+st.dias+'d)'
-      :'Sem treinamento';
-    const av = AVG_COLORS[i%AVG_COLORS.length];
-    const initials = emp.nome.split(' ').map(p=>p[0]).slice(0,2).join('');
-    const selBg  = isSelected?'background:#EFF6FF':'';
-    const chkBg  = isSelected?'background:#1A6BFF':'background:transparent';
-    const chkBd  = isSelected?'border-color:#1A6BFF':'border-color:#CBD5E1';
-    const empId  = emp.id;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;${selBg};transition:.15s"
-      onclick="toggleCtEmp(${empId})"
-      onmouseover="this.style.background=this.style.background||'var(--surface2)'"
-      onmouseout="this.style.background='${isSelected?'#EFF6FF':''}'">
-      <div style="width:34px;height:34px;border-radius:50%;background:${av};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0">${initials}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;color:var(--text)">${escHtml(emp.nome)}</div>
-        <div style="font-size:11px;color:var(--text2)">${escHtml(emp.cargo||'—')} · ${emp.turno||'—'}</div>
-      </div>
-      <div style="font-size:12px;flex-shrink:0">${statusDot} ${statusTxt}</div>
-      <div style="width:22px;height:22px;border-radius:50%;border:2px solid;${chkBd};${chkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        ${isSelected?'<span style="color:#fff;font-size:13px;line-height:1">✓</span>':''}
-      </div>
-    </div>`;
-  }).join('');
+    const sel = selIds.has(String(emp.id));
+    const dot = st.cat==='vencido'?'🔴':st.cat==='vencendo'?'🟡':st.cat==='ok'?'🟢':'⚪';
+    const txt = st.cat==='vencido'?'Vencido '+Math.abs(st.dias)+'d'
+              : st.cat==='vencendo'?'Vence em '+st.dias+'d'
+              : st.cat==='ok'?'Em dia '+st.dias+'d'
+              : 'Sem treinamento';
+    const av  = AVG_COLORS[i%AVG_COLORS.length];
+    const ini = emp.nome.split(' ').map(p=>p[0]).slice(0,2).join('');
+    const bg  = sel ? '#EFF6FF' : '#ffffff';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #E4E8F4;cursor:pointer;background:'+bg+';transition:.15s';
+    row.dataset.idx = i;
+    row.innerHTML =
+      '<div style="width:34px;height:34px;border-radius:50%;background:'+av+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0">'+ini+'</div>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:600">'+escHtml(emp.nome)+'</div>'
+        +'<div style="font-size:11px;color:#9098B8">'+escHtml(emp.cargo||'')+(emp.turno?' · '+emp.turno:'')+'</div>'
+      +'</div>'
+      +'<div style="font-size:12px;color:#5A6280">'+dot+' '+txt+'</div>'
+      +'<div style="width:22px;height:22px;border-radius:50%;border:2px solid '+(sel?'#1A6BFF':'#CBD5E1')+';background:'+(sel?'#1A6BFF':'transparent')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +(sel?'<span style="color:#fff;font-size:13px">✓</span>':'')
+      +'</div>';
+    row.addEventListener('click', function(){ toggleCtEmp(String(emp.id)); });
+    return row;
+  });
+  el.innerHTML = '';
+  rows.forEach(r=>el.appendChild(r));
 }
 
 function toggleCtEmp(empId){
@@ -3214,8 +3215,8 @@ function toggleCtEmp(empId){
     // No participant limit
     // Get status for this emp
     const trnNome = document.getElementById('ct-treinamento')?.value||'';
-    function normN_1(s){ return String(s||'').toUpperCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' '); }
-    const myTrns = trnNome ? trns.filter(t=>String(t.empId)===String(emp.id)&&normCt(t.nome)===normCt(trnNome)) : [];
+    const normN_1 = s=>String(s||'').toUpperCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ');
+    const myTrns = trnNome ? trns.filter(t=>String(t.empId)===String(emp.id)&&normN_1(t.nome)===normN_1(trnNome)) : [];
     const best = myTrns.length ? myTrns.reduce((a,b)=>((b.vencimento||'')>(a.vencimento||'')?b:a)) : null;
     const v = best?.vencimento||'';
     const d = v ? daysDiff(v) : null;
