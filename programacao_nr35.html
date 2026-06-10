@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Programação NR-35 — In Haus Industrial</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#F4F6FB;color:#0F1623;padding:24px}
+.header{background:linear-gradient(135deg,#0F1623,#1A2540);border-radius:16px;padding:28px 32px;color:#fff;margin-bottom:24px}
+.header-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.logo{width:48px;height:48px;background:#1A6BFF;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#fff;flex-shrink:0}
+.header-title{font-size:22px;font-weight:800}
+.header-sub{font-size:13px;opacity:.6;margin-top:3px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.stat{background:rgba(255,255,255,.08);border-radius:10px;padding:14px 16px;text-align:center}
+.stat-val{font-size:28px;font-weight:800;line-height:1}
+.stat-label{font-size:11px;opacity:.6;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.turma-section{margin-bottom:28px}
+.turma-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid}
+.turma-badge{padding:4px 14px;border-radius:20px;font-size:13px;font-weight:800;font-family:'DM Mono',monospace}
+.turma-count{font-size:13px;font-weight:500;opacity:.7}
+.grupos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.grupo{background:#fff;border-radius:14px;border:1px solid #E4E8F4;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.grupo-header{padding:14px 16px;border-bottom:1px solid #F0F3FA}
+.grupo-num{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-family:'DM Mono',monospace}
+.grupo-dates{display:flex;gap:8px;flex-wrap:wrap}
+.date-chip{display:flex;align-items:center;gap:6px;background:#F4F6FB;border:1px solid #E4E8F4;border-radius:8px;padding:6px 10px}
+.date-chip-label{font-size:10px;color:#9098B8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.date-chip-val{font-size:13px;font-weight:700;color:#0F1623}
+.membros{padding:8px 0}
+.membro{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid #F8F9FC;transition:.15s}
+.membro:last-child{border-bottom:none}
+.membro:hover{background:#F8F9FC}
+.membro-num{font-size:12px;font-weight:700;color:#9098B8;width:18px;text-align:center;flex-shrink:0}
+.membro-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.membro-info{flex:1;min-width:0}
+.membro-nome{font-size:13px;font-weight:600;color:#0F1623;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.membro-cargo{font-size:11px;color:#9098B8;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend{background:#fff;border-radius:14px;border:1px solid #E4E8F4;padding:20px;margin-bottom:24px}
+.legend-title{font-size:14px;font-weight:700;margin-bottom:12px}
+.legend-items{display:flex;gap:16px;flex-wrap:wrap}
+.footer{text-align:center;font-size:12px;color:#9098B8;margin-top:24px}
+@media print{body{padding:12px}  .no-print{display:none}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">IH</div>
+    <div>
+      <div class="header-title">Programação de Treinamento — NR-35 Trabalho em Altura</div>
+      <div class="header-sub">In Haus Industrial · Samarco Ubu · Gerado em 08/06/2026</div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">14</div><div class="stat-label">Turmas</div></div>
+    <div class="stat"><div class="stat-val">58</div><div class="stat-label">Participantes</div></div>
+    <div class="stat"><div class="stat-val" style="color:#FCA5A5">8</div><div class="stat-label">Urgentes</div></div>
+    <div class="stat"><div class="stat-val">5</div><div class="stat-label">Turnos</div></div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-title">Legenda de urgência</div>
+  <div class="legend-items">
+    <span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700">🔴 VENCIDO — Prioridade máxima</span>
+    <span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700">🟡 Vence em até 60 dias — Urgente</span>
+    <span style="background:#F1F3F9;color:#5A6080;padding:3px 10px;border-radius:20px;font-size:12px">⚪ Sem treinamento — Regularizar</span>
+  </div>
+</div>
+
+<div class="no-print" style="margin-bottom:20px;display:flex;gap:10px">
+  <button onclick="window.print()" style="padding:10px 20px;background:#1A6BFF;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">🖨 Imprimir</button>
+  <button onclick="copyToClipboard()" style="padding:10px 20px;background:#fff;border:1px solid #E4E8F4;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;color:#0F1623">📋 Copiar resumo</button>
+</div>
+
+<div class="turma-section">
+  <div class="turma-header" style="border-color:#1A6BFF20">
+    <span class="turma-badge" style="background:#EFF6FF;color:#1A6BFF">Turma A</span>
+    <span class="turma-count">2 grupos · 8 participantes</span>
+  </div>
+  <div class="grupos-grid">
+    <div class="grupo">
+      <div class="grupo-header" style="background:#EFF6FF20">
+        <div class="grupo-num" style="color:#1A6BFF">Turma A — Grupo 1</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Quinta-feira, 11 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Qui 11/06</div></div>
+          </div>
+          <div class="date-chip" title="Quinta-feira, 18 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Qui 18/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">RD</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="RAPHAEL DOS SANTOS LOYOLA">RAPHAEL DOS SANTOS LOYOLA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🔴 VENCIDO</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">CF</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="CLEUTON FERREIRA DOS SANTOS">CLEUTON FERREIRA DOS SANTOS</div>
+            <div class="membro-cargo">ENCARREGADO OPERACIONAL</div>
+          </div>
+          <span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🟡 Vence em 47d</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">JR</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="JHION ROGER DE MORAES SECATO">JHION ROGER DE MORAES SECATO</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🟡 Vence em 47d</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">AD</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="ALCENIR DINIZ FARIAS">ALCENIR DINIZ FARIAS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">BP</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="BENEDITO PEREIRA DOS SANTOS">BENEDITO PEREIRA DOS SANTOS</div>
+            <div class="membro-cargo">OPERADOR DE ESTAÇÃO DE EFLUENTES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#EFF6FF20">
+        <div class="grupo-num" style="color:#1A6BFF">Turma A — Grupo 2</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Quinta-feira, 11 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Qui 11/06</div></div>
+          </div>
+          <div class="date-chip" title="Quinta-feira, 18 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Qui 18/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">DV</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="DIOGO VIEIRA BORGES">DIOGO VIEIRA BORGES</div>
+            <div class="membro-cargo">OPERADOR DE ESTAÇÃO DE EFLUENTES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">EB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="EDGARD BENA DOS SANTOS">EDGARD BENA DOS SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">PA</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="PRISCILA ANDRADE DA SILVA">PRISCILA ANDRADE DA SILVA</div>
+            <div class="membro-cargo">OPERADOR DE ESTAÇÃO DE EFLUENTES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="turma-section">
+  <div class="turma-header" style="border-color:#7C3AED20">
+    <span class="turma-badge" style="background:#F5F3FF;color:#7C3AED">Turma B</span>
+    <span class="turma-count">2 grupos · 8 participantes</span>
+  </div>
+  <div class="grupos-grid">
+    <div class="grupo">
+      <div class="grupo-header" style="background:#F5F3FF20">
+        <div class="grupo-num" style="color:#7C3AED">Turma B — Grupo 1</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Terça-feira, 16 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Ter 16/06</div></div>
+          </div>
+          <div class="date-chip" title="Quarta-feira, 17 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Qua 17/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">DL</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="DAVI LUCAS CALDEIRA DE MATTOS">DAVI LUCAS CALDEIRA DE MATTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">FW</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="FELLIPE WENDER SIQUEIRA SIMOES">FELLIPE WENDER SIQUEIRA SIMOES</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">GB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="GEOVANE BRANDAO BELEM">GEOVANE BRANDAO BELEM</div>
+            <div class="membro-cargo">ENCARREGADO OPERACIONAL</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">KS</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="KRISLANE SANTANA CARDOSO">KRISLANE SANTANA CARDOSO</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">LF</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="LUIZ FELIPE SENNA DA SILVA">LUIZ FELIPE SENNA DA SILVA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#F5F3FF20">
+        <div class="grupo-num" style="color:#7C3AED">Turma B — Grupo 2</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Terça-feira, 16 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Ter 16/06</div></div>
+          </div>
+          <div class="date-chip" title="Quarta-feira, 17 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Qua 17/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">MA</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="MARCOS ADRIANO GIULIATTI SEMEDO">MARCOS ADRIANO GIULIATTI SEMEDO</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">MB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="MAURICIO BETTCHER CUNHA">MAURICIO BETTCHER CUNHA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">SF</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="SIMONE FERREIRA DA SILVA">SIMONE FERREIRA DA SILVA</div>
+            <div class="membro-cargo">OPERADOR DE ESTAÇÃO DE EFLUENTES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="turma-section">
+  <div class="turma-header" style="border-color:#05966920">
+    <span class="turma-badge" style="background:#F0FDF4;color:#059669">Turma C</span>
+    <span class="turma-count">3 grupos · 11 participantes</span>
+  </div>
+  <div class="grupos-grid">
+    <div class="grupo">
+      <div class="grupo-header" style="background:#F0FDF420">
+        <div class="grupo-num" style="color:#059669">Turma C — Grupo 1</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+          <div class="date-chip" title="Segunda-feira, 06 de julho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Seg 06/07</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">DV</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="DANIEL VIEIRA BARBOZA">DANIEL VIEIRA BARBOZA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🔴 VENCIDO</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">ED</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="EDINALDO DA SILVA SANTOS">EDINALDO DA SILVA SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🟡 Vence em 47d</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">LM</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="LUCIANO MUNIZ NASCIMENTO">LUCIANO MUNIZ NASCIMENTO</div>
+            <div class="membro-cargo">MECANICO MANUTENÇÃO</div>
+          </div>
+          <span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🟡 Vence em 47d</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">DF</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="DAVID FERREIRA DE OLIVEIRA">DAVID FERREIRA DE OLIVEIRA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">EF</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="EMERSON FERREIRA SEMEDO">EMERSON FERREIRA SEMEDO</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#F0FDF420">
+        <div class="grupo-num" style="color:#059669">Turma C — Grupo 2</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+          <div class="date-chip" title="Segunda-feira, 06 de julho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Seg 06/07</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">MV</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="MARCIUS VINICIUS PINHEIRO SANTANA">MARCIUS VINICIUS PINHEIRO SANTANA</div>
+            <div class="membro-cargo">OPERADOR DE ESTAÇÃO DE EFLUENTES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">MT</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="MAYDIANE TRINDADE RIBEIRO BASTOS">MAYDIANE TRINDADE RIBEIRO BASTOS</div>
+            <div class="membro-cargo">OPERADOR DE ESTAÇÃO DE EFLUENTES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">NL</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="NAUBERT LEONARDO CAMBOIM CORREA DA">NAUBERT LEONARDO CAMBOIM CORREA DA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">RS</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="REGINALDO SANTOS">REGINALDO SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">RS</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="REGIS SILVA DAS NEVES">REGIS SILVA DAS NEVES</div>
+            <div class="membro-cargo">OPERADOR DE ESTAÇÃO DE EFLUENTES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#F0FDF420">
+        <div class="grupo-num" style="color:#059669">Turma C — Grupo 3</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+          <div class="date-chip" title="Segunda-feira, 06 de julho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Seg 06/07</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">SB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="SAULO BRANDAO DA SILVA">SAULO BRANDAO DA SILVA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="turma-section">
+  <div class="turma-header" style="border-color:#D9770620">
+    <span class="turma-badge" style="background:#FFFBEB;color:#D97706">Turma D</span>
+    <span class="turma-count">2 grupos · 10 participantes</span>
+  </div>
+  <div class="grupos-grid">
+    <div class="grupo">
+      <div class="grupo-header" style="background:#FFFBEB20">
+        <div class="grupo-num" style="color:#D97706">Turma D — Grupo 1</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Segunda-feira, 15 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Seg 15/06</div></div>
+          </div>
+          <div class="date-chip" title="Segunda-feira, 22 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Seg 22/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">GB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="GABRIEL BARBOZA DA TRINDADE ALVES">GABRIEL BARBOZA DA TRINDADE ALVES</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#FEE2E2;color:#991B1B;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🔴 VENCIDO</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">DS</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="DEIVID SERAFIM DOS SANTOS">DEIVID SERAFIM DOS SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">FD</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="FILIPE DAS CHAGAS LUIZ">FILIPE DAS CHAGAS LUIZ</div>
+            <div class="membro-cargo">MECANICO MANUTENÇÃO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">HJ</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="HIGOR JULIAN DA CUNHA ANDRADE">HIGOR JULIAN DA CUNHA ANDRADE</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">ID</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="IVANETE DA CRUZ SANTOS">IVANETE DA CRUZ SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#FFFBEB20">
+        <div class="grupo-num" style="color:#D97706">Turma D — Grupo 2</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Segunda-feira, 15 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Seg 15/06</div></div>
+          </div>
+          <div class="date-chip" title="Segunda-feira, 22 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Seg 22/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">JE</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="JALEILTON ERMINIGILDO DOS SANTOS">JALEILTON ERMINIGILDO DOS SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">JO</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="JOEDSON OLIVEIRA DA PENHA">JOEDSON OLIVEIRA DA PENHA</div>
+            <div class="membro-cargo">MECANICO MANUTENÇÃO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">RG</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="RAI GAZINELE MATIAS FERES">RAI GAZINELE MATIAS FERES</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">RV</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="RONNY VICTOR DOS SANTOS">RONNY VICTOR DOS SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">LH</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="LUCIANO HONORATO DA SILVA">LUCIANO HONORATO DA SILVA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="turma-section">
+  <div class="turma-header" style="border-color:#0891B220">
+    <span class="turma-badge" style="background:#E0F7FA;color:#0891B2">Turma ADM</span>
+    <span class="turma-count">5 grupos · 21 participantes</span>
+  </div>
+  <div class="grupos-grid">
+    <div class="grupo">
+      <div class="grupo-header" style="background:#E0F7FA20">
+        <div class="grupo-num" style="color:#0891B2">Turma ADM — Grupo 1</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Quinta-feira, 11 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Qui 11/06</div></div>
+          </div>
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">HC</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="HERCULES CARVALHO LOYOLA">HERCULES CARVALHO LOYOLA</div>
+            <div class="membro-cargo">MECANICO MANUTENÇÃO</div>
+          </div>
+          <span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700">🟡 Vence em 47d</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">EC</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="ELAINE CRISTINA GONORING VILELA">ELAINE CRISTINA GONORING VILELA</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">EM</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="ELSO MARTINS">ELSO MARTINS</div>
+            <div class="membro-cargo">COORDENADOR DE OPERAÇÕES</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">EB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="EVANDRO BREGUNCE BISPO">EVANDRO BREGUNCE BISPO</div>
+            <div class="membro-cargo">OPERADOR DE EQUIPAMENTOS (MUNCK)</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">GN</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="GEOVANA NASCIMENTO ROCHA">GEOVANA NASCIMENTO ROCHA</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#E0F7FA20">
+        <div class="grupo-num" style="color:#0891B2">Turma ADM — Grupo 2</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Quinta-feira, 11 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Qui 11/06</div></div>
+          </div>
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">HC</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="HELLEN CAROLINY NASCIMENTO SCHMIDT">HELLEN CAROLINY NASCIMENTO SCHMIDT</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">HP</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="HERBERT PITANGA DA ROCHA">HERBERT PITANGA DA ROCHA</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">JD</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="JEFFERSON DA CONCEICAO SILVA RAMOS">JEFFERSON DA CONCEICAO SILVA RAMOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">JM</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="JOSE MAURO NASCIMENTO DA SILVA">JOSE MAURO NASCIMENTO DA SILVA</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">LD</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="LEONARDO DE OLIVEIRA XIMENES">LEONARDO DE OLIVEIRA XIMENES</div>
+            <div class="membro-cargo">MEDICO DO TRABALHO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#E0F7FA20">
+        <div class="grupo-num" style="color:#0891B2">Turma ADM — Grupo 3</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Quinta-feira, 11 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Qui 11/06</div></div>
+          </div>
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">LC</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="LUCCA COUTINHO FAGUNDES">LUCCA COUTINHO FAGUNDES</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">MB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="MALENA BARBOSA COELHO">MALENA BARBOSA COELHO</div>
+            <div class="membro-cargo">ENGENHEIRO DE SEGURANÇA DO TRABALHO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">MS</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="MIQUEIAS SENNA ESPERIDIAD">MIQUEIAS SENNA ESPERIDIAD</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">MD</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="MONIKY DA PENHA RODRIGUES">MONIKY DA PENHA RODRIGUES</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">PC</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="PEDRO COMINOTTI DE ALMEIDA ADOLFO">PEDRO COMINOTTI DE ALMEIDA ADOLFO</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#E0F7FA20">
+        <div class="grupo-num" style="color:#0891B2">Turma ADM — Grupo 4</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Quinta-feira, 11 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Qui 11/06</div></div>
+          </div>
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">RV</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="RAONY VASCO MACHADO AMARAL">RAONY VASCO MACHADO AMARAL</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">2</div>
+          <div class="membro-avatar" style="background:#059669">RM</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="RAPHAEL MULINARI DINIZ">RAPHAEL MULINARI DINIZ</div>
+            <div class="membro-cargo">TECNICO EM SEGURANÇA DO TRABALHO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">3</div>
+          <div class="membro-avatar" style="background:#D97706">RB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="RAYANNE BARBOZA REIS DA MATTA">RAYANNE BARBOZA REIS DA MATTA</div>
+            <div class="membro-cargo">ASSISTENTE ADMINISTRATIVO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">4</div>
+          <div class="membro-avatar" style="background:#DC2626">RB</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="ROSELI BULHOES DE SOUZA MATTOS">ROSELI BULHOES DE SOUZA MATTOS</div>
+            <div class="membro-cargo">TECNICO EM PLANEJAMENTO</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+        <div class="membro">
+          <div class="membro-num">5</div>
+          <div class="membro-avatar" style="background:#0891B2">TR</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="THIAGO RODOLFO DOS SANTOS">THIAGO RODOLFO DOS SANTOS</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+    <div class="grupo">
+      <div class="grupo-header" style="background:#E0F7FA20">
+        <div class="grupo-num" style="color:#0891B2">Turma ADM — Grupo 5</div>
+        <div class="grupo-dates">
+          <div class="date-chip" title="Quinta-feira, 11 de junho de 2026">
+            <div><div class="date-chip-label">📖 Dia 1 — Teórico</div><div class="date-chip-val">Qui 11/06</div></div>
+          </div>
+          <div class="date-chip" title="Sexta-feira, 12 de junho de 2026">
+            <div><div class="date-chip-label">🔧 Dia 2 — Prático</div><div class="date-chip-val">Sex 12/06</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="membros">
+        <div class="membro">
+          <div class="membro-num">1</div>
+          <div class="membro-avatar" style="background:#7C3AED">YH</div>
+          <div class="membro-info">
+            <div class="membro-nome" title="YGOR HENRIQUE DA SILVA KYFER">YGOR HENRIQUE DA SILVA KYFER</div>
+            <div class="membro-cargo">OPERADOR MANTENEDOR</div>
+          </div>
+          <span style="background:#F1F3F9;color:#5A6080;padding:2px 8px;border-radius:20px;font-size:11px">⚪ Sem treinamento</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  Programação gerada automaticamente pelo SST Manager — In Haus Industrial<br>
+  NR-35 Trabalho em Altura · 58 participantes · 14 turmas · 08/06/2026
+</div>
+
+<script>
+function copyToClipboard(){
+  const text = "PROGRAMA\u00c7\u00c3O NR-35 \u2014 IN HAUS INDUSTRIAL (08/06/2026)\n\nTURMA A \u2014 Grupo 1\n  \ud83d\udcc5 Dia 1: Quinta-feira, 11 de junho de 2026\n  \ud83d\udcc5 Dia 2: Quinta-feira, 18 de junho de 2026\n  1. RAPHAEL DOS SANTOS LOYOLA \u2014 OPERADOR MANTENEDOR \ud83d\udd34\n  2. CLEUTON FERREIRA DOS SANTOS \u2014 ENCARREGADO OPERACIONAL \ud83d\udfe1\n  3. JHION ROGER DE MORAES SECATO \u2014 OPERADOR MANTENEDOR \ud83d\udfe1\n  4. ALCENIR DINIZ FARIAS \u2014 OPERADOR MANTENEDOR \u26aa\n  5. BENEDITO PEREIRA DOS SANTOS \u2014 OPERADOR DE ESTA\u00c7\u00c3O DE EFLUENTES \u26aa\n\nTURMA A \u2014 Grupo 2\n  \ud83d\udcc5 Dia 1: Quinta-feira, 11 de junho de 2026\n  \ud83d\udcc5 Dia 2: Quinta-feira, 18 de junho de 2026\n  1. DIOGO VIEIRA BORGES \u2014 OPERADOR DE ESTA\u00c7\u00c3O DE EFLUENTES \u26aa\n  2. EDGARD BENA DOS SANTOS \u2014 OPERADOR MANTENEDOR \u26aa\n  3. PRISCILA ANDRADE DA SILVA \u2014 OPERADOR DE ESTA\u00c7\u00c3O DE EFLUENTES \u26aa\n\nTURMA ADM \u2014 Grupo 1\n  \ud83d\udcc5 Dia 1: Quinta-feira, 11 de junho de 2026\n  \ud83d\udcc5 Dia 2: Sexta-feira, 12 de junho de 2026\n  1. HERCULES CARVALHO LOYOLA \u2014 MECANICO MANUTEN\u00c7\u00c3O \ud83d\udfe1\n  2. ELAINE CRISTINA GONORING VILELA \u2014 OPERADOR MANTENEDOR \u26aa\n  3. ELSO MARTINS \u2014 COORDENADOR DE OPERA\u00c7\u00d5ES \u26aa\n  4. EVANDRO BREGUNCE BISPO \u2014 OPERADOR DE EQUIPAMENTOS (MUNCK) \u26aa\n  5. GEOVANA NASCIMENTO ROCHA \u2014 TECNICO EM PLANEJAMENTO \u26aa\n\nTURMA ADM \u2014 Grupo 2\n  \ud83d\udcc5 Dia 1: Quinta-feira, 11 de junho de 2026\n  \ud83d\udcc5 Dia 2: Sexta-feira, 12 de junho de 2026\n  1. HELLEN CAROLINY NASCIMENTO SCHMIDT \u2014 TECNICO EM PLANEJAMENTO \u26aa\n  2. HERBERT PITANGA DA ROCHA \u2014 TECNICO EM PLANEJAMENTO \u26aa\n  3. JEFFERSON DA CONCEICAO SILVA RAMOS \u2014 OPERADOR MANTENEDOR \u26aa\n  4. JOSE MAURO NASCIMENTO DA SILVA \u2014 TECNICO EM PLANEJAMENTO \u26aa\n  5. LEONARDO DE OLIVEIRA XIMENES \u2014 MEDICO DO TRABALHO \u26aa\n\nTURMA ADM \u2014 Grupo 3\n  \ud83d\udcc5 Dia 1: Quinta-feira, 11 de junho de 2026\n  \ud83d\udcc5 Dia 2: Sexta-feira, 12 de junho de 2026\n  1. LUCCA COUTINHO FAGUNDES \u2014 TECNICO EM PLANEJAMENTO \u26aa\n  2. MALENA BARBOSA COELHO \u2014 ENGENHEIRO DE SEGURAN\u00c7A DO TRABALHO \u26aa\n  3. MIQUEIAS SENNA ESPERIDIAD \u2014 TECNICO EM PLANEJAMENTO \u26aa\n  4. MONIKY DA PENHA RODRIGUES \u2014 OPERADOR MANTENEDOR \u26aa\n  5. PEDRO COMINOTTI DE ALMEIDA ADOLFO \u2014 TECNICO EM PLANEJAMENTO \u26aa\n\nTURMA ADM \u2014 Grupo 4\n  \ud83d\udcc5 Dia 1: Quinta-feira, 11 de junho de 2026\n  \ud83d\udcc5 Dia 2: Sexta-feira, 12 de junho de 2026\n  1. RAONY VASCO MACHADO AMARAL \u2014 OPERADOR MANTENEDOR \u26aa\n  2. RAPHAEL MULINARI DINIZ \u2014 TECNICO EM SEGURAN\u00c7A DO TRABALHO \u26aa\n  3. RAYANNE BARBOZA REIS DA MATTA \u2014 ASSISTENTE ADMINISTRATIVO \u26aa\n  4. ROSELI BULHOES DE SOUZA MATTOS \u2014 TECNICO EM PLANEJAMENTO \u26aa\n  5. THIAGO RODOLFO DOS SANTOS \u2014 OPERADOR MANTENEDOR \u26aa\n\nTURMA ADM \u2014 Grupo 5\n  \ud83d\udcc5 Dia 1: Quinta-feira, 11 de junho de 2026\n  \ud83d\udcc5 Dia 2: Sexta-feira, 12 de junho de 2026\n  1. YGOR HENRIQUE DA SILVA KYFER \u2014 OPERADOR MANTENEDOR \u26aa\n\nTURMA B \u2014 Grupo 1\n  \ud83d\udcc5 Dia 1: Ter\u00e7a-feira, 16 de junho de 2026\n  \ud83d\udcc5 Dia 2: Quarta-feira, 17 de junho de 2026\n  1. DAVI LUCAS CALDEIRA DE MATTOS \u2014 OPERADOR MANTENEDOR \u26aa\n  2. FELLIPE WENDER SIQUEIRA SIMOES \u2014 OPERADOR MANTENEDOR \u26aa\n  3. GEOVANE BRANDAO BELEM \u2014 ENCARREGADO OPERACIONAL \u26aa\n  4. KRISLANE SANTANA CARDOSO \u2014 OPERADOR MANTENEDOR \u26aa\n  5. LUIZ FELIPE SENNA DA SILVA \u2014 OPERADOR MANTENEDOR \u26aa\n\nTURMA B \u2014 Grupo 2\n  \ud83d\udcc5 Dia 1: Ter\u00e7a-feira, 16 de junho de 2026\n  \ud83d\udcc5 Dia 2: Quarta-feira, 17 de junho de 2026\n  1. MARCOS ADRIANO GIULIATTI SEMEDO \u2014 OPERADOR MANTENEDOR \u26aa\n  2. MAURICIO BETTCHER CUNHA \u2014 OPERADOR MANTENEDOR \u26aa\n  3. SIMONE FERREIRA DA SILVA \u2014 OPERADOR DE ESTA\u00c7\u00c3O DE EFLUENTES \u26aa\n\nTURMA C \u2014 Grupo 1\n  \ud83d\udcc5 Dia 1: Sexta-feira, 12 de junho de 2026\n  \ud83d\udcc5 Dia 2: Segunda-feira, 06 de julho de 2026\n  1. DANIEL VIEIRA BARBOZA \u2014 OPERADOR MANTENEDOR \ud83d\udd34\n  2. EDINALDO DA SILVA SANTOS \u2014 OPERADOR MANTENEDOR \ud83d\udfe1\n  3. LUCIANO MUNIZ NASCIMENTO \u2014 MECANICO MANUTEN\u00c7\u00c3O \ud83d\udfe1\n  4. DAVID FERREIRA DE OLIVEIRA \u2014 OPERADOR MANTENEDOR \u26aa\n  5. EMERSON FERREIRA SEMEDO \u2014 OPERADOR MANTENEDOR \u26aa\n\nTURMA C \u2014 Grupo 2\n  \ud83d\udcc5 Dia 1: Sexta-feira, 12 de junho de 2026\n  \ud83d\udcc5 Dia 2: Segunda-feira, 06 de julho de 2026\n  1. MARCIUS VINICIUS PINHEIRO SANTANA \u2014 OPERADOR DE ESTA\u00c7\u00c3O DE EFLUENTES \u26aa\n  2. MAYDIANE TRINDADE RIBEIRO BASTOS \u2014 OPERADOR DE ESTA\u00c7\u00c3O DE EFLUENTES \u26aa\n  3. NAUBERT LEONARDO CAMBOIM CORREA DA \u2014 OPERADOR MANTENEDOR \u26aa\n  4. REGINALDO SANTOS \u2014 OPERADOR MANTENEDOR \u26aa\n  5. REGIS SILVA DAS NEVES \u2014 OPERADOR DE ESTA\u00c7\u00c3O DE EFLUENTES \u26aa\n\nTURMA C \u2014 Grupo 3\n  \ud83d\udcc5 Dia 1: Sexta-feira, 12 de junho de 2026\n  \ud83d\udcc5 Dia 2: Segunda-feira, 06 de julho de 2026\n  1. SAULO BRANDAO DA SILVA \u2014 OPERADOR MANTENEDOR \u26aa\n\nTURMA D \u2014 Grupo 1\n  \ud83d\udcc5 Dia 1: Segunda-feira, 15 de junho de 2026\n  \ud83d\udcc5 Dia 2: Segunda-feira, 22 de junho de 2026\n  1. GABRIEL BARBOZA DA TRINDADE ALVES \u2014 OPERADOR MANTENEDOR \ud83d\udd34\n  2. DEIVID SERAFIM DOS SANTOS \u2014 OPERADOR MANTENEDOR \u26aa\n  3. FILIPE DAS CHAGAS LUIZ \u2014 MECANICO MANUTEN\u00c7\u00c3O \u26aa\n  4. HIGOR JULIAN DA CUNHA ANDRADE \u2014 OPERADOR MANTENEDOR \u26aa\n  5. IVANETE DA CRUZ SANTOS \u2014 OPERADOR MANTENEDOR \u26aa\n\nTURMA D \u2014 Grupo 2\n  \ud83d\udcc5 Dia 1: Segunda-feira, 15 de junho de 2026\n  \ud83d\udcc5 Dia 2: Segunda-feira, 22 de junho de 2026\n  1. JALEILTON ERMINIGILDO DOS SANTOS \u2014 OPERADOR MANTENEDOR \u26aa\n  2. JOEDSON OLIVEIRA DA PENHA \u2014 MECANICO MANUTEN\u00c7\u00c3O \u26aa\n  3. RAI GAZINELE MATIAS FERES \u2014 OPERADOR MANTENEDOR \u26aa\n  4. RONNY VICTOR DOS SANTOS \u2014 OPERADOR MANTENEDOR \u26aa\n  5. LUCIANO HONORATO DA SILVA \u2014 OPERADOR MANTENEDOR \u26aa\n";
+  navigator.clipboard.writeText(text).then(()=>alert('✅ Resumo copiado para a área de transferência!')).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); alert('✅ Copiado!');
+  });
+}
+</script>
+</body></html>
